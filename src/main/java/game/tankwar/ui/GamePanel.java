@@ -1,7 +1,9 @@
 package game.tankwar.ui;
 
+import game.tankwar.entity.EnemyTank;
 import game.tankwar.entity.Tank;
 import game.tankwar.entity.Hero;
+import game.tankwar.setting.GameSetting;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +12,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Objects;
+import java.util.Vector;
 
 /**
  * 继承JPanel 作为画板
@@ -18,6 +21,9 @@ import java.util.Objects;
 public class GamePanel extends JPanel implements KeyListener, MouseListener {
     private Graphics g;
     private final Hero hero;
+    private final GameSetting gameSetting = GameSetting.getInstance();
+    //敌人坦克相关 放入Vector集合中(线程安全)
+    private final Vector<EnemyTank> enemyTanks = new Vector<>();
 
     /*
         继承JFrame的类是画框
@@ -34,7 +40,10 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
      * 直接把现有的坦克都初始化
      */
     public GamePanel(){
-        this.hero = new Hero(100,100);
+        this.hero = new Hero(100,500);
+        for (int i = 0; i < gameSetting.getEnemyTankSize(); i++) {
+            enemyTanks.add(new EnemyTank(100*(i+2),50));
+        }
     }
 
 
@@ -53,9 +62,12 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
         this.g = g;//传入画笔 供其他方法使用
         //填充游戏区域为黑色
         g.fillRect(0,0,1280,960);
-
-        drawTank(hero,hero.getDirection(),Tank.Type.SELF);
-
+        //画出自己的坦克
+        drawTank(hero,Tank.Type.SELF);
+        //画出敌人的坦克
+        for (EnemyTank enemyTank : enemyTanks) {
+            drawTank(enemyTank,Tank.Type.ENEMY);
+        }
 
 
     }
@@ -145,8 +157,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
      * g为画笔     direction为方向  上下左右
      * type为坦克的类型(Tank$TankType)
      */
-    public void drawTank(Tank tank, Tank.Direction direction, Tank.Type type){
-
+    public void drawTank(Tank tank, Tank.Type type){
         //根据坦克类型设置颜色
         if (Objects.requireNonNull(type) == Tank.Type.SELF) {
             g.setColor(Color.ORANGE);
@@ -154,6 +165,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
             g.setColor(Color.lightGray);
         }
         //根据方向绘制坦克
+        Tank.Direction direction = tank.getDirection();
         switch (direction){
             case UP -> {
                 //左右履带

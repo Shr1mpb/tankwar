@@ -1,5 +1,7 @@
 package game.tankwar.ui;
 
+import game.tankwar.constant.GameInfo;
+
 import javax.swing.*;
 
 @SuppressWarnings({"all"})
@@ -18,6 +20,8 @@ public class PanelContainer extends JFrame {
         this.setVisible(true);
         //关闭后释放资源 让JVM会结束
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //设置窗口名字
+        this.setTitle(GameInfo.gameName + "\tVersion: " + GameInfo.version);
 
     }
 
