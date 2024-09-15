@@ -1,5 +1,3 @@
-package game.tankwar;
-
 import game.tankwar.ui.TankGame;
 
 public class Starter {

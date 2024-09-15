@@ -7,7 +7,11 @@ public class PanelContainer extends JFrame {
     private GamePanel mp;
     public PanelContainer() {
         mp = new GamePanel();
+        //添加画板
         this.add(mp);
+        //添加监听器(通过画板实现)
+        this.addKeyListener(mp);
+        this.addMouseListener(mp);
         //分辨率
         this.setSize(1280, 960);
         //可见
