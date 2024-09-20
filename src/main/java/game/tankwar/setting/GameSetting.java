@@ -19,4 +19,6 @@ public class GameSetting {
     private int enemyTankSize;
     private int level;
     private int remainingTankNum;
+    private int width;//分辨率长
+    private int height;//分辨率宽
 }

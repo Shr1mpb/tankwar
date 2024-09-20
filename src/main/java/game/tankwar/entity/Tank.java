@@ -15,6 +15,7 @@ public class Tank {
     private int y_location;
     private Tank.Direction direction = Direction.UP;//方向，默认为向上
     private int moveFactor = 3;//移动因子 在键盘监听时一次执行的移动次数
+    private Bullet bullet;
 
 
     public Tank(int x,int y){
@@ -30,6 +31,13 @@ public class Tank {
     public Tank(int x, int y, int moveFactor) {
         this.x_location = x;
         this.y_location = y;
+        this.moveFactor = moveFactor;
+    }
+
+    public Tank(int x, int y, Direction direction, int moveFactor) {
+        this.x_location = x;
+        this.y_location = y;
+        this.direction = direction;
         this.moveFactor = moveFactor;
     }
 
@@ -71,5 +79,32 @@ public class Tank {
     }
     public void moveRight() {
         this.x_location += 1;
+    }
+
+    /**
+     * 坦克射击
+     */
+    public void shotOppositeTank() {
+        //如果现在没有子弹 或 子弹已经结束 才能打出
+        if (!(bullet == null || !bullet.isLive())) {
+            return;
+        }
+        //创建子弹
+        switch (direction) {
+            case UP -> {
+                bullet = new Bullet(getX_location() + 10, getY_location(), direction);
+            }
+            case RIGHT -> {
+                bullet = new Bullet(getX_location() + 30, getY_location() + 10, direction);
+            }
+            case DOWN -> {
+                bullet = new Bullet(getX_location() + 10, getY_location() + 30, direction);
+            }
+            case LEFT -> {
+                bullet = new Bullet(getX_location(), getY_location() + 20, direction);
+            }
+        }
+        //启动线程
+        new Thread(bullet).start();
     }
 }

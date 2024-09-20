@@ -1,6 +1,8 @@
 package game.tankwar.entity;
 
-
+/**
+ * 敌人坦克 设置默认方向朝下
+ */
 public class EnemyTank extends Tank {
     {
         setDirection(Direction.DOWN);//敌人坦克默认的方向是向下

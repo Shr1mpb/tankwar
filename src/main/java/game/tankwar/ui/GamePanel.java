@@ -1,5 +1,6 @@
 package game.tankwar.ui;
 
+import game.tankwar.entity.Bullet;
 import game.tankwar.entity.EnemyTank;
 import game.tankwar.entity.Tank;
 import game.tankwar.entity.Hero;
@@ -18,10 +19,10 @@ import java.util.Vector;
  * 继承JPanel 作为画板
  * 实现KeyListener 监听键盘事件
  */
-public class GamePanel extends JPanel implements KeyListener, MouseListener {
+public class GamePanel extends JPanel implements KeyListener, MouseListener,Runnable {
     private Graphics g;
     private final Hero hero;
-    private final GameSetting gameSetting = GameSetting.getInstance();
+    private final GameSetting setting = GameSetting.getInstance();
     //敌人坦克相关 放入Vector集合中(线程安全)
     private final Vector<EnemyTank> enemyTanks = new Vector<>();
 
@@ -41,7 +42,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
      */
     public GamePanel(){
         this.hero = new Hero(100,500);
-        for (int i = 0; i < gameSetting.getEnemyTankSize(); i++) {
+        for (int i = 0; i < setting.getEnemyTankSize(); i++) {
             enemyTanks.add(new EnemyTank(100*(i+2),50));
         }
     }
@@ -61,13 +62,19 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
         super.paint(g);//初始化
         this.g = g;//传入画笔 供其他方法使用
         //填充游戏区域为黑色
-        g.fillRect(0,0,1280,960);
+        g.fillRect(0,0,setting.getWidth(),setting.getHeight());
         //画出自己的坦克
         drawTank(hero,Tank.Type.SELF);
         //画出敌人的坦克
         for (EnemyTank enemyTank : enemyTanks) {
             drawTank(enemyTank,Tank.Type.ENEMY);
         }
+        //画出自己坦克的子弹
+        Bullet bullet = hero.getBullet();
+        if (bullet != null && bullet.isLive()) {
+            g.fill3DRect(bullet.getX(),bullet.getY(),3,3,false);
+        }
+
 
 
     }
@@ -89,27 +96,36 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        for (int i = 0;i <hero.getMoveFactor();i++) {
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_W -> {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_W -> {
+                for (int i = 0;i <hero.getMoveFactor();i++) {
                     hero.setDirection(Tank.Direction.UP);
                     hero.moveUp();
                 }
-                case KeyEvent.VK_A -> {
+            }
+            case KeyEvent.VK_A -> {
+                for (int i = 0;i <hero.getMoveFactor();i++) {
                     hero.setDirection(Tank.Direction.LEFT);
                     hero.moveLeft();
                 }
-                case KeyEvent.VK_S -> {
+            }
+            case KeyEvent.VK_S -> {
+                for (int i = 0;i <hero.getMoveFactor();i++) {
                     hero.setDirection(Tank.Direction.DOWN);
                     hero.moveDown();
                 }
-                case KeyEvent.VK_D -> {
+            }
+            case KeyEvent.VK_D -> {
+                for (int i = 0;i <hero.getMoveFactor();i++) {
                     hero.setDirection(Tank.Direction.RIGHT);
                     hero.moveRight();
                 }
             }
-            this.repaint();
+            case KeyEvent.VK_SPACE -> {
+                hero.shotOppositeTank();
+            }
         }
+
     }
 
     /**
@@ -207,5 +223,20 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
 
         }
 
+    }
+
+    /**
+     * 该方法用于不停地重绘 以显示子弹 并提高坦克帧率
+     */
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            this.repaint();
+        }
     }
 }
