@@ -5,6 +5,9 @@ import game.tankwar.entity.EnemyTank;
 import game.tankwar.entity.Tank;
 import game.tankwar.entity.Hero;
 import game.tankwar.setting.GameSetting;
+import game.tankwar.ui.input.KeyStatus;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,12 +22,15 @@ import java.util.Vector;
  * 继承JPanel 作为画板
  * 实现KeyListener 监听键盘事件
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class GamePanel extends JPanel implements KeyListener, MouseListener,Runnable {
     private Graphics g;
     private final Hero hero;
     private final GameSetting setting = GameSetting.getInstance();
     //敌人坦克相关 放入Vector集合中(线程安全)
     private final Vector<EnemyTank> enemyTanks = new Vector<>();
+    private final KeyStatus keyStatus = KeyStatus.getInstance();
 
     /*
         继承JFrame的类是画框
@@ -91,38 +97,25 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
 
     /**
      * 某个键被按下时
-     * 这里处理坦克移动
      * @param e the event to be processed
      */
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_W -> {
-                for (int i = 0;i <hero.getMoveFactor();i++) {
-                    hero.setDirection(Tank.Direction.UP);
-                    hero.moveUp();
-                }
+                keyStatus.setW(true);
             }
             case KeyEvent.VK_A -> {
-                for (int i = 0;i <hero.getMoveFactor();i++) {
-                    hero.setDirection(Tank.Direction.LEFT);
-                    hero.moveLeft();
-                }
+                keyStatus.setA(true);
             }
             case KeyEvent.VK_S -> {
-                for (int i = 0;i <hero.getMoveFactor();i++) {
-                    hero.setDirection(Tank.Direction.DOWN);
-                    hero.moveDown();
-                }
+                keyStatus.setS(true);
             }
             case KeyEvent.VK_D -> {
-                for (int i = 0;i <hero.getMoveFactor();i++) {
-                    hero.setDirection(Tank.Direction.RIGHT);
-                    hero.moveRight();
-                }
+                keyStatus.setD(true);
             }
             case KeyEvent.VK_SPACE -> {
-                hero.shotOppositeTank();
+                keyStatus.setSpace(true);
             }
         }
 
@@ -134,7 +127,23 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
      */
     @Override
     public void keyReleased(KeyEvent e) {
-
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_W -> {
+                keyStatus.setW(false);
+            }
+            case KeyEvent.VK_A -> {
+                keyStatus.setA(false);
+            }
+            case KeyEvent.VK_S -> {
+                keyStatus.setS(false);
+            }
+            case KeyEvent.VK_D -> {
+                keyStatus.setD(false);
+            }
+            case KeyEvent.VK_SPACE -> {
+                keyStatus.setSpace(false);
+            }
+        }
     }
 
 
@@ -232,7 +241,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
     public void run() {
         while (true) {
             try {
-                Thread.sleep(5);
+                Thread.sleep(4);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

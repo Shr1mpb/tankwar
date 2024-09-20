@@ -14,7 +14,7 @@ public class Tank {
     private int x_location;
     private int y_location;
     private Tank.Direction direction = Direction.UP;//方向，默认为向上
-    private int moveFactor = 3;//移动因子 在键盘监听时一次执行的移动次数
+    private int moveFactor = 2;//移动因子 在键盘监听时一次执行的移动次数
     private Bullet bullet;
 
 
@@ -80,6 +80,24 @@ public class Tank {
     public void moveRight() {
         this.x_location += 1;
     }
+
+    public void move(Direction direction) {
+            this.setDirection(direction);
+            switch (direction) {
+                case UP -> {
+                    for (int i = 0; i < moveFactor; i++) moveUp();
+                }
+                case DOWN -> {
+                    for (int i = 0; i < moveFactor; i++) moveDown();
+                }
+                case LEFT -> {
+                    for (int i = 0; i < moveFactor; i++) moveLeft();
+                }
+                case RIGHT -> {
+                    for (int i = 0; i < moveFactor; i++) moveRight();
+                }
+            }
+        }
 
     /**
      * 坦克射击
