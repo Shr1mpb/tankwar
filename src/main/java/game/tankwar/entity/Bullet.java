@@ -3,6 +3,8 @@ package game.tankwar.entity;
 import game.tankwar.setting.GameSetting;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 子弹类
  * 属性：横纵坐标
@@ -16,13 +18,25 @@ public class Bullet implements Runnable {
     private int y;
     private Tank.Direction direction;
     private int moveFactor = 15;
-    private boolean isLive = true;
+    private boolean isLive = false;
     private GameSetting setting = GameSetting.getInstance();
+    private LocalDateTime shotTime;
+
+    public Bullet() {}
 
     public Bullet(int x,int y,Tank.Direction direction) {
         this.x = x;
         this.y = y;
         this.direction = direction;
+    }
+
+    //该方法用于激活子弹并设置子弹的位置和方向、射击时间
+    public void setAttribute(int x,int y,Tank.Direction direction) {
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+        this.isLive = true;
+        this.shotTime = LocalDateTime.now();
     }
 
     /**

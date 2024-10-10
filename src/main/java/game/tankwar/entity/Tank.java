@@ -1,8 +1,12 @@
 package game.tankwar.entity;
 
+import game.tankwar.setting.GameSetting;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.Vector;
 
 /**
  * 坦克基类
@@ -15,9 +19,16 @@ public class Tank {
     private int y_location;
     private Tank.Direction direction = Direction.UP;//方向，默认为向上
     private int moveFactor = 2;//移动因子 在键盘监听时一次执行的移动次数
-    private Bullet bullet;
+    private Vector<Bullet> bullets;
 
+    {
+        //代码块 用于初始化子弹 分敌人和自己
+        bullets = new Vector<>((this.getClass() == Hero.class)? GameSetting.getInstance().getMaxBulletCount() : GameSetting.getInstance().getMaxEnemyBulletCount());
+        for (int i = 0; i < bullets.capacity(); i++) {
+            bullets.add(new Bullet());
+        }
 
+    }
     public Tank(int x,int y){
         this.x_location = x;
         this.y_location = y;
@@ -102,27 +113,44 @@ public class Tank {
     /**
      * 坦克射击
      */
-    public void shotOppositeTank() {
-        //如果现在没有子弹 或 子弹已经结束 才能打出
-        if (!(bullet == null || !bullet.isLive())) {
-            return;
+    public synchronized void shotOppositeTank() {
+        //射击子弹 如果该子弹非存活并且子弹的射击在间隔允许范围内 则射击一次
+        for (Bullet bullet : bullets) {
+            if (!(bullet.isLive())) {//找出死掉的子弹 如果该子弹可以射击 则射击
+
+                //子弹射击间隔合法性
+                for (Bullet bullet1 : bullets) {
+                    if (bullet1.isLive()) {//只看场上已有的子弹 如果射击延迟有一个不满足 则直接结束射击
+                        if (
+                                !(LocalDateTime.now().     isAfter      (bullet1.getShotTime().plusNanos(
+                                this.getClass() == Hero.class? (GameSetting.getInstance().getShotLag()):(GameSetting.getInstance().getEnemyShotLag())
+                                    ))
+                                )
+                        ) {
+                            return;
+                        }
+                    }
+                }
+
+                //激活子弹并开始运作
+                switch (direction) {
+                    case UP -> {
+                        bullet.setAttribute(getX_location() + 10, getY_location(), direction);
+                    }
+                    case RIGHT -> {
+                        bullet.setAttribute(getX_location() + 30, getY_location() + 10, direction);
+                    }
+                    case DOWN -> {
+                        bullet.setAttribute(getX_location() + 10, getY_location() + 30, direction);
+                    }
+                    case LEFT -> {
+                        bullet.setAttribute(getX_location(), getY_location() + 20, direction);
+                    }
+                }
+                new Thread(bullet).start();
+                return;//射击成功一次就结束
+            }
         }
-        //创建子弹
-        switch (direction) {
-            case UP -> {
-                bullet = new Bullet(getX_location() + 10, getY_location(), direction);
-            }
-            case RIGHT -> {
-                bullet = new Bullet(getX_location() + 30, getY_location() + 10, direction);
-            }
-            case DOWN -> {
-                bullet = new Bullet(getX_location() + 10, getY_location() + 30, direction);
-            }
-            case LEFT -> {
-                bullet = new Bullet(getX_location(), getY_location() + 20, direction);
-            }
-        }
-        //启动线程
-        new Thread(bullet).start();
+
     }
 }

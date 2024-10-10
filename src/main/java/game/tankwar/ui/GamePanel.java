@@ -76,9 +76,11 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
             drawTank(enemyTank,Tank.Type.ENEMY);
         }
         //画出自己坦克的子弹
-        Bullet bullet = hero.getBullet();
-        if (bullet != null && bullet.isLive()) {
-            g.fill3DRect(bullet.getX(),bullet.getY(),3,3,false);
+        Vector<Bullet> bullets = hero.getBullets();
+        for (Bullet bullet : bullets) {
+            if (bullet.isLive()) {
+                g.fill3DRect(bullet.getX(), bullet.getY(), 3, 3, false);
+            }
         }
 
 

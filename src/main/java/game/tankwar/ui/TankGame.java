@@ -23,6 +23,9 @@ public class TankGame {
         gameSetting.setLevel(1);
         gameSetting.setWidth(1280);
         gameSetting.setHeight(960);
+        gameSetting.setMaxBulletCount(3);
+        gameSetting.setMaxEnemyBulletCount(1);
+        gameSetting.setShotLag(1000 * 1000000);//此处前方数字单位为微秒
         if (gameSetting.getWidth() < 800 || gameSetting.getHeight() < 600) {
             throw new ScreenException(ExceptionInfo.SCREEN_EXCEPTION);
         }
