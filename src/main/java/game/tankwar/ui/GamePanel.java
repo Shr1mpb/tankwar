@@ -82,6 +82,20 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
                 g.fill3DRect(bullet.getX(), bullet.getY(), 3, 3, false);
             }
         }
+        //画出敌人坦克的子弹
+        //自己坦克的子弹通过空格可以发射 然后isAlive设置为true
+        //敌人坦克的子弹需要手动触发射击
+        for (EnemyTank enemyTank : enemyTanks) {
+            Vector<Bullet> enemyTankBullets = enemyTank.getBullets();
+            for (Bullet enemyBullet : enemyTankBullets) {
+                if (enemyBullet.isLive()) {
+                    g.fill3DRect(enemyBullet.getX(), enemyBullet.getY(), 3, 3, false);
+                }
+            }
+        }
+        for (EnemyTank enemyTank : enemyTanks) {//射击
+            enemyTank.shotOppositeTank();
+        }
 
 
 
