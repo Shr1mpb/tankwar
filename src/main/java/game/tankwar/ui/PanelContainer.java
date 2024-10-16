@@ -24,6 +24,7 @@ public class PanelContainer extends JFrame implements Runnable {
         this.setVisible(true);
         //关闭后释放资源 让JVM会结束
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
         //设置窗口名字
         this.setTitle(GameInfo.GAME_NAME + "\tVersion: " + GameInfo.VERSION);
         //不停地让Panel重绘(run方法) 以提高帧率并显示子弹轨迹

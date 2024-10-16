@@ -20,6 +20,7 @@ public class Tank {
     private Tank.Direction direction = Direction.UP;//方向，默认为向上
     private int moveFactor = 2;//移动因子 在键盘监听时一次执行的移动次数
     private Vector<Bullet> bullets;
+    private boolean isAlive = true;
 
     {
         //代码块 用于初始化子弹 分敌人和自己

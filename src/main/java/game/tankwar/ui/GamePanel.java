@@ -1,5 +1,6 @@
 package game.tankwar.ui;
 
+import game.tankwar.constant.GameMessage;
 import game.tankwar.entity.Bullet;
 import game.tankwar.entity.EnemyTank;
 import game.tankwar.entity.Tank;
@@ -8,6 +9,7 @@ import game.tankwar.setting.GameSetting;
 import game.tankwar.ui.input.KeyStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.SneakyThrows;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,6 +33,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
     //敌人坦克相关 放入Vector集合中(线程安全)
     private final Vector<EnemyTank> enemyTanks = new Vector<>();
     private final KeyStatus keyStatus = KeyStatus.getInstance();
+    private int enemyTankCurrentCount;
 
     /*
         继承JFrame的类是画框
@@ -63,6 +66,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
      *      3.窗口大小发生变化时被调用
      *      4.repaint方法时被调用
      */
+    @SneakyThrows
     @Override
     public void paint(Graphics g) {
         super.paint(g);//初始化
@@ -70,10 +74,20 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
         //填充游戏区域为黑色
         g.fillRect(0,0,setting.getWidth(),setting.getHeight());
         //画出自己的坦克
-        drawTank(hero,Tank.Type.SELF);
-        //画出敌人的坦克
+        if (hero.isAlive()){
+            drawTank(hero,Tank.Type.SELF);
+        }else{
+            System.out.println(GameMessage.FAILED);
+            Thread.sleep(1000);
+            System.exit(0);
+        }
+        //画出敌人的坦克 并记录此次绘制时存活的敌人坦克数量
+        enemyTankCurrentCount = 0;
         for (EnemyTank enemyTank : enemyTanks) {
-            drawTank(enemyTank,Tank.Type.ENEMY);
+            if (enemyTank.isAlive()) {
+                drawTank(enemyTank, Tank.Type.ENEMY);
+                enemyTankCurrentCount++;
+            }
         }
         //画出自己坦克的子弹
         Vector<Bullet> bullets = hero.getBullets();
@@ -97,10 +111,42 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
             enemyTank.shotOppositeTank();
         }
 
+        //判断敌人坦克有没有全部被击毁 如果是则结束游戏
+        if (enemyTankCurrentCount == 0) {
+            System.out.println(GameMessage.VICTORY);
+            Thread.sleep(1000);
+            System.exit(0);
+        }
 
 
     }
 
+    /**
+     * 判断我方的子弹是否集中敌人的坦克
+     * @param s
+     * @param enemyTank
+     */
+    public static void hitTank(Bullet s, EnemyTank enemyTank) {
+        switch (enemyTank.getDirection()) {
+            case UP:
+            case DOWN:
+                if (s.getX() > enemyTank.getX_location() && s.getX() < enemyTank.getX_location() + 20
+                        && s.getY() > enemyTank.getY_location() && s.getY() < enemyTank.getY_location() + 30) {
+                    s.setLive(false);
+                    enemyTank.setAlive(false);
+                }
+                break;
+            case LEFT:
+            case RIGHT:
+                if (s.getX() > enemyTank.getX_location() && s.getX() < enemyTank.getX_location() + 30
+                        && s.getY() > enemyTank.getY_location() && s.getY() < enemyTank.getY_location() + 20) {
+                    s.setLive(false);
+                    enemyTank.setAlive(false);
+                }
+
+
+        }
+    }
 
     /**
      * 有字符输出时被监听
@@ -252,6 +298,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
 
     /**
      * 该方法用于不停地重绘 以显示子弹 并提高坦克帧率
+     * 重绘时检测子弹打中与否
      */
     @Override
     public void run() {
@@ -261,6 +308,17 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener,Runn
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
+            //检测子弹打中没有 (调用hitTank方法) 胜利/失败 结算放在paint方法中
+            if (hero.isAlive()) {
+                for (EnemyTank enemyTank : enemyTanks) {
+                    for (Bullet heroBullet : hero.getBullets()) {
+                        hitTank(heroBullet,enemyTank);
+                    }
+                }
+            }
+
+
             this.repaint();
         }
     }

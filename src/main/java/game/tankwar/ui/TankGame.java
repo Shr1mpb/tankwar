@@ -2,8 +2,12 @@ package game.tankwar.ui;
 
 import game.tankwar.constant.ExceptionInfo;
 import game.tankwar.constant.GameInfo;
+import game.tankwar.constant.GameMessage;
 import game.tankwar.exception.ScreenException;
 import game.tankwar.setting.GameSetting;
+
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 public class TankGame {
     /**
@@ -32,6 +36,43 @@ public class TankGame {
         }
         //创建游戏面板
         PanelContainer pc = new PanelContainer();
+        pc.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                System.out.println(GameMessage.START);
+            }
+
+            //由于设置关闭窗口时直接退出 下面的windowClosed将不再有用
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.out.println(GameMessage.CLOSE);
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+
+            }
+        });
         //运行检测按键状态的线程
         new Thread(pc).start();
 
